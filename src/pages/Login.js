@@ -1,22 +1,21 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../config"; // 🔥 IMPORT THE NEW CONFIG
 import "../styles/login.css";
 
 function Login() {
   const navigate = useNavigate();
 
-  // Note: We don't strictly need to track the role dropdown anymore because
-  // the backend tells us what role they are when they log in!
   const [role, setRole] = useState("admin"); 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
   const handleLogin = async (e) => {
-    e.preventDefault(); // Prevent any default form submission behavior
+    e.preventDefault(); 
 
     try {
-      // 1. Send the data to your Python backend
-      const response = await fetch("http://127.0.0.1:5000/api/auth/login", {
+      // 🔥 UPDATED: Uses API_BASE_URL instead of http://127.0.0.1:5000
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -27,12 +26,9 @@ function Login() {
         }),
       });
 
-      // 2. Wait for the database to reply
       const data = await response.json();
 
       if (response.ok) {
-        // SUCCESS: The backend verified them!
-        // Save their token and name so the rest of the app knows who is logged in
         localStorage.setItem("token", data.token);
         localStorage.setItem("role", data.role);
         localStorage.setItem("username", data.username);
@@ -40,14 +36,12 @@ function Login() {
 
         alert(`Welcome back, ${data.full_name}!`);
 
-        // Navigate based on their REAL role from the database
         if (data.role === "Admin" || data.role === "admin") {
           navigate("/admin");
         } else {
           navigate("/employee");
         }
       } else {
-        // FAILED: The backend rejected them
         alert(data.error || "Invalid credentials");
       }
     } catch (error) {
@@ -59,16 +53,12 @@ function Login() {
   return (
     <div className="login-container">
       <div className="login-wrapper">
-
-        {/* LEFT SIDE */}
         <div className="login-brand">
           <div>
             <div className="logo-circle">CAF</div>
             <div className="brand-title">
               <h1>Cafe Management POS</h1>
-              <p>
-                Fast, automated order processing and inventory tracking for your cafe staff.
-              </p>
+              <p>Fast, automated order processing and inventory tracking for your cafe staff.</p>
             </div>
           </div>
           <div className="brand-footer">
@@ -76,7 +66,6 @@ function Login() {
           </div>
         </div>
 
-        {/* RIGHT SIDE */}
         <div className="login-form">
           <h2>Sign in to continue</h2>
           <p>Select your role and enter your credentials to access the system.</p>
@@ -118,12 +107,8 @@ function Login() {
               <input type="checkbox" />
               <label>Remember this device</label>
             </div>
-
-            <button className="btn-primary" onClick={handleLogin}>
-              Login
-            </button>
+            <button className="btn-primary" onClick={handleLogin}>Login</button>
           </div>
-
         </div>
       </div>
     </div>
